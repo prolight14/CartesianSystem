@@ -1,0 +1,25 @@
+{
+  "name": "cartesiansystem",
+  "version": "0.0.1",
+  "description": "A spatial partitioning system",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prolight14/CartesianSystem.git"
+  },
+  "keywords": [
+    "javascript",
+    "nodejs",
+    "spatial"
+  ],
+  "author": "prolight14",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/prolight14/CartesianSystem/issues"
+  },
+  "homepage": "https://github.com/prolight14/CartesianSystem#readme"
+}
