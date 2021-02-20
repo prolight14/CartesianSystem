@@ -534,13 +534,20 @@ var CartesianSystem = {
         );
 
         this.grid = new CameraGrid(
-            config.grid.width, 
-            config.grid.height, 
+            config.grid.cols, 
+            config.grid.rows, 
             config.grid.cellWidth,
             config.grid.cellHeight
         );
 
         this.gameObjectHandler = new GameObjectHandler();
+
+        this.init = function()
+        {
+            this.grid.reset();
+
+            return this;
+        };
 
         var _this = this;
         this.add = {};
@@ -632,20 +639,20 @@ var CartesianSystem = {
 
         this.bounds = {
             minX: 0,
-            minX: 0,
-            maxX: 0 + this.grid.width * this.grid.cellWidth,
-            maxY: 0 + this.grid.height * this.grid.cellHeight
+            minY: 0,
+            maxX: 0 + this.grid.cols * this.grid.cellWidth,
+            maxY: 0 + this.grid.rows * this.grid.cellHeight
         };
 
         this.update = function(x, y)
         {
             this.camera.updateScroll(x, y, this.bounds);
 
-            var minPos = this.grid.getCoordinates(this.camera.boundingBox.minX, this.camera.boundingBox.minY);
-            var maxPos = this.grid.getCoordinates(this.camera.boundingBox.maxX, this.camera.boundingBox.maxY);
+            var minPos = this.minCamPos = this.grid.getCoordinates(this.camera.boundingBox.minX, this.camera.boundingBox.minY);
+            var maxPos = this.maxCamPos = this.grid.getCoordinates(this.camera.boundingBox.maxX, this.camera.boundingBox.maxY);
 
             this.gameObjectHandler.addToProcessList(
-                cameraGrid,
+                this.grid,
                 minPos.col, 
                 minPos.row, 
                 maxPos.col, 
@@ -654,7 +661,7 @@ var CartesianSystem = {
 
             var args = Array.prototype.slice.call(arguments);
             args.shift(2);
-            this.gameObjectHandler.act.apply(this.gameObjectHandler, [cameraGrid].concat(args));
+            this.gameObjectHandler.act.apply(this.gameObjectHandler, [this.grid].concat(args));
 
             this.gameObjectHandler.resetProcessList();
         };

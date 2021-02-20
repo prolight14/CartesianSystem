@@ -9,34 +9,32 @@ var config = {
     grid: {
         cols: 20,
         rows: 34,
-        cellWidth: 30,
-        cellHeight: 30
+        cellWidth: 200,
+        cellHeight: 200
     }
 };
 
-var world = new CartesianSystem.World(config);
-
-var gameObjects = CartesianSystem.CreateAA([], undefined, "gameObjects");
-
-function Block(x, y, width, height)
-{
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-}
-
-var blocks = gameObjects.addObject("block", CartesianSystem.CreateAA(Block));
-
-blocks.add(300, 127, 80, 32);
-blocks.add(545, 87, 13, 42);
-
-console.log(gameObjects);
+var world = new CartesianSystem.World(config).init();
 
 window.setInterval(() =>
 {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = "white";
+
+    world.update(canvas.width / 2, canvas.height / 2);
+
+    world.grid.loopThroughVisibleCells(
+        world.minCamPos.col, 
+        world.minCamPos.row, 
+        world.maxCamPos.col, 
+        world.maxCamPos.row, 
+        function(cell, col, row)
+        {
+            ctx.strokeRect(col * config.grid.cellWidth, row * config.grid.cellHeight, config.grid.cellWidth, config.grid.cellHeight);
+        }
+    );
 },
 1000 / 60);
