@@ -3,8 +3,10 @@ var ctx = canvas.getContext("2d");
 
 var config = {
     window: {
-        width: canvas.width,
-        height: canvas.height
+        x: 60,
+        y: 34,
+        width: canvas.width - 120,
+        height: canvas.height - 68
     },
     grid: {
         cols: 25,
@@ -96,16 +98,25 @@ function keyReleased(event)
 window.addEventListener('keydown', keyPressed, false);
 window.addEventListener('keyup', keyReleased, false);
 
+function random(min, max)
+{
+    return min + Math.random() * (max - min);
+}
+
 var worldBounds = world.bounds;
 for(var i = 0; i < 500; i++)
 {
     var w = 150 + Math.random() * 20;
     var h = 150 + Math.random() * 20;
 
-    blocks.add(w / 2 + Math.random() * (worldBounds.maxX - worldBounds.minX - w), h / 2 + Math.random() * (worldBounds.maxY - worldBounds.minY - h), w, h, 
-    ["blue", "red", "green", "purple", "yellow"][Math.floor(Math.random() * 5)]);
+    blocks.add(
+        w / 2 + Math.random() * (worldBounds.maxX - worldBounds.minX - w),
+        h / 2 + Math.random() * (worldBounds.maxY - worldBounds.minY - h), 
+        random(40, 80) * 3, 
+        random(40, 80) * 3,
+        ["blue", "red", "green", "purple", "yellow"][Math.floor(Math.random() * 5)]
+    );
 }
-
 
 var Player = function(x, y, width, height)
 {
@@ -147,15 +158,23 @@ var players = world.add.gameObjectArray(Player);
 
 var player1 = players.add(300, 300, 30, 30);
 
+var mouse = {
+    x: -1,
+    y: -1
+};
+
 window.setInterval(() =>
 {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.strokeStyle = "white";
-    var camTranslation = world.camera.getTranslation();
+    ctx.strokeStyle = "#03B1D1";
 
+    ctx.strokeRect(world.camera.x, world.camera.y, world.camera.width, world.camera.height);
+    ctx.strokeStyle = "white";
+
+    var camTranslation = world.camera.getTranslation();
     ctx.translate(camTranslation.x, camTranslation.y); 
 
         world.update(player1.x + player1.width / 2, player1.y + player1.height / 2, "update", "draw");
@@ -167,10 +186,49 @@ window.setInterval(() =>
             world.maxCamPos.row, 
             function(cell, col, row)
             {
+                if(mouse.isDown)
+                {
+                    for(var i in cell)
+                    {
+                        var object = world.get.gameObject(cell[i].arrayName, cell[i].id);
+
+                        var tx, ty;
+
+                        tx = world.camera.scrollX - world.camera.halfWidth - world.camera.x + mouse.x;
+                        ty = world.camera.scrollY - world.camera.halfHeight - world.camera.y + mouse.y;
+
+                        if(tx > object.body.boundingBox.minX && ty > object.body.boundingBox.minY && 
+                        tx < object.body.boundingBox.maxX && ty < object.body.boundingBox.maxY)
+                        {
+                            world.remove.gameObject(object._arrayName, object._id);
+                        }
+                    }
+                }
+
                 ctx.strokeRect(col * config.grid.cellWidth, row * config.grid.cellHeight, config.grid.cellWidth, config.grid.cellHeight);
             }
         );
-
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 },
 1000 / 60);
+
+var setMouse = (event) =>
+{
+    var rect = canvas.getBoundingClientRect();
+    mouse = {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+    };
+};
+
+document.addEventListener("mousemove", setMouse); 
+document.addEventListener("mousedown", (event) =>
+{
+    setMouse(event);
+    mouse.isDown = true;
+}); 
+document.addEventListener("mouseup", (event) =>
+{
+    setMouse(event);
+    mouse.isDown = false;
+}); 

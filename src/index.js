@@ -117,6 +117,21 @@ var CartesianSystem = {
             return _this.gameObjectHandler.getArray(arrayName)[id];
         };
 
+        this.remove = {};
+        this.remove.gameObjectArray = function(arrayName)
+        {
+            _this.grid.removeAll(arrayName);
+            gameObjectHandler.removeArray(arrayName);
+            return this;
+        };
+        this.remove.gameObject = function(arrayName, id)
+        {
+            var gameObjectArray = _this.gameObjectHandler.getArray(arrayName);
+            _this.grid.removeReference(gameObjectArray[id]);
+            gameObjectArray.remove(id);
+            return this;
+        };
+
         // Bounds to confine the camera into
         this.bounds = {
             minX: 0,

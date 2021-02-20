@@ -117,6 +117,28 @@ function CameraGrid(cols, rows, cellWidth, cellHeight)
             }
         }
     };
+
+    // Will be expensive since this applies to the entire grid
+    this.removeAll = function(arrayToRemove)
+    {
+        var col, row, cell, i;
+
+        for(col = this.minCol; col <= this.maxCol; col++)
+        {
+            for(row = this.minRow; row <= this.maxRow; row++)
+            {
+                cell = this.grid[col][row];
+
+                for(i in cell)
+                {
+                    if(cell[i].arrayName === arrayToRemove)
+                    {
+                        delete cell[i];
+                    }
+                }
+            }
+        }
+    };
 }
 
 module.exports = CameraGrid;

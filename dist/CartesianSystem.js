@@ -187,6 +187,28 @@ function CameraGrid(cols, rows, cellWidth, cellHeight)
             }
         }
     };
+
+    // Will be expensive since this applies to the entire grid
+    this.removeAll = function(arrayToRemove)
+    {
+        var col, row, cell, i;
+
+        for(col = this.minCol; col <= this.maxCol; col++)
+        {
+            for(row = this.minRow; row <= this.maxRow; row++)
+            {
+                cell = this.grid[col][row];
+
+                for(i in cell)
+                {
+                    if(cell[i].arrayName === arrayToRemove)
+                    {
+                        delete cell[i];
+                    }
+                }
+            }
+        }
+    };
 }
 
 module.exports = CameraGrid;
@@ -644,6 +666,21 @@ var CartesianSystem = {
         this.get.gameObject = function(arrayName, id)
         {
             return _this.gameObjectHandler.getArray(arrayName)[id];
+        };
+
+        this.remove = {};
+        this.remove.gameObjectArray = function(arrayName)
+        {
+            _this.grid.removeAll(arrayName);
+            gameObjectHandler.removeArray(arrayName);
+            return this;
+        };
+        this.remove.gameObject = function(arrayName, id)
+        {
+            var gameObjectArray = _this.gameObjectHandler.getArray(arrayName);
+            _this.grid.removeReference(gameObjectArray[id]);
+            gameObjectArray.remove(id);
+            return this;
         };
 
         // Bounds to confine the camera into
