@@ -48,6 +48,14 @@ function Camera(x, y, width, height)
         this.boundingBox.maxX = this.scrollX + this.halfWidth;
         this.boundingBox.maxY = this.scrollY + this.halfHeight;
     };
+
+    this.getTranslation = function()
+    {
+        return {
+            x: this.x + this.halfWidth - this.scrollX,
+            y: this.y + this.halfHeight - this.scrollY
+        };
+    };
 }
 
 module.exports = Camera;
@@ -519,6 +527,7 @@ module.exports = GameObjectHandler;
   \******************/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
+var CreateAA = __webpack_require__(/*! ./CreateAA.js */ "./CreateAA.js");
 var CameraGrid = __webpack_require__(/*! ./CameraGrid.js */ "./CameraGrid.js");
 var Camera = __webpack_require__(/*! ./Camera.js */ "./Camera.js");
 var GameObjectHandler = __webpack_require__(/*! ./GameObjectHandler.js */ "./GameObjectHandler.js");
@@ -551,14 +560,14 @@ var CartesianSystem = {
 
         var _this = this;
         this.add = {};
-        this.add.gameObjectArray = function()
+        this.add.gameObjectArray = function(object, arrayName)
         {
             if(arrayName === undefined) 
             { 
                 arrayName = object.name.charAt(0).toLowerCase() + object.name.slice(1); 
             }
 
-            var array = _this.gameObjectHandler.addArray(arrayName, createAA(object, undefined, arrayName));
+            var array = _this.gameObjectHandler.addArray(arrayName, CreateAA(object, undefined, arrayName));
 
             var lastAdd = array.add;
             Object.defineProperty(array, "add", 
@@ -569,7 +578,7 @@ var CartesianSystem = {
                 value: function()
                 {
                     var gameObject = lastAdd.apply(this, arguments);
-                    _this.cameraGrid.addReference(gameObject);
+                    _this.grid.addReference(gameObject);
                     return gameObject;
                 }
             });
@@ -587,7 +596,7 @@ var CartesianSystem = {
                         return;
                     }
 
-                    _this.cameraGrid.addReference(gameObject);
+                    _this.grid.addReference(gameObject);
                     return gameObject;
                 }
             });
@@ -600,7 +609,7 @@ var CartesianSystem = {
                 configurable: true,
                 value: function(id)
                 {
-                    _this.cameraGrid.removeReference(this[id]);
+                    _this.grid.removeReference(this[id]);
                     return lastRemove.apply(this, arguments);
                 }
             });
@@ -612,7 +621,7 @@ var CartesianSystem = {
                 configurable: true,
                 value: function(name)
                 {
-                    _this.cameraGrid.removeReference(this[this.references[name]]);
+                    _this.grid.removeReference(this[this.references[name]]);
                     return lastRemoveObject.apply(this, arguments);
                 }
             });
@@ -623,7 +632,7 @@ var CartesianSystem = {
         {
             var gameObjectArray = _this.gameObjectHandler.getArray(arrayName);
             var gameObject = gameObjectArray.add.apply(gameObjectArray, Array.prototype.slice.call(arguments, 1));
-            cameraGrid.addReference(gameObject);
+            _this.grid.addReference(gameObject);
             return gameObject;
         };
 
@@ -637,6 +646,7 @@ var CartesianSystem = {
             return _this.gameObjectHandler.getArray(arrayName)[id];
         };
 
+        // Bounds to confine the camera into
         this.bounds = {
             minX: 0,
             minY: 0,
@@ -651,22 +661,31 @@ var CartesianSystem = {
             var minPos = this.minCamPos = this.grid.getCoordinates(this.camera.boundingBox.minX, this.camera.boundingBox.minY);
             var maxPos = this.maxCamPos = this.grid.getCoordinates(this.camera.boundingBox.maxX, this.camera.boundingBox.maxY);
 
+            // Bail if we don't have enough arguments to suffice `GameObjecthandler#act`
+            if(arguments.length <= 2)
+            {
+                return;
+            }
+
             this.gameObjectHandler.addToProcessList(
                 this.grid,
-                minPos.col, 
-                minPos.row, 
-                maxPos.col, 
+                minPos.col,
+                minPos.row,
+                maxPos.col,
                 maxPos.row
             );
 
-            var args = Array.prototype.slice.call(arguments);
-            args.shift(2);
-            this.gameObjectHandler.act.apply(this.gameObjectHandler, [this.grid].concat(args));
+            var inputArgs = Array.prototype.slice.call(arguments).slice(2);
+
+            for(var i = 0; i < inputArgs.length; i++)
+            {
+                this.gameObjectHandler.act.apply(this.gameObjectHandler, [this.grid].concat(inputArgs[i]));
+            }
 
             this.gameObjectHandler.resetProcessList();
         };
     },
-    CreateAA: __webpack_require__(/*! ./CreateAA.js */ "./CreateAA.js"),
+    CreateAA: CreateAA,
     Camera: Camera,
     CameraGrid: CameraGrid,
     GameObjectHandler: GameObjectHandler

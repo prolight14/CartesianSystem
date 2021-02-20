@@ -29,6 +29,14 @@ function Camera(x, y, width, height)
         this.boundingBox.maxX = this.scrollX + this.halfWidth;
         this.boundingBox.maxY = this.scrollY + this.halfHeight;
     };
+
+    this.getTranslation = function()
+    {
+        return {
+            x: this.x + this.halfWidth - this.scrollX,
+            y: this.y + this.halfHeight - this.scrollY
+        };
+    };
 }
 
 module.exports = Camera;
