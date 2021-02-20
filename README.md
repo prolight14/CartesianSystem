@@ -1,8 +1,7 @@
 # Cartesian System
 
-This is another version of the Cartesian System. Right now it is in very early stages of development. It is similar to the last [CartesianSystem](https://github.com/prolight14/OldCartesianSystem) but simpler.
-
-Please don't even try to use this, there's nothing here yet.
+This is another version of the Cartesian System. It is similar to the last [CartesianSystem](https://github.com/prolight14/OldCartesianSystem) but simpler.
+You can think of this as a "lite" version. Feel free to use. But it is still in development.
 
 To contribute:
 ---
