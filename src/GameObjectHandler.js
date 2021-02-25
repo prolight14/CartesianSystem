@@ -9,6 +9,11 @@ function GameObjectHandler()
     // Will be used as a cache to contain all the stuff we need to process
     var used = {};
 
+    this.forEach = function(callback)
+    {
+        return gameObjects.forEach(callback);
+    };
+
     this.addArray = function(name, gameObjectArray)
     {
         return gameObjects.addObject(name, gameObjectArray);
@@ -92,7 +97,7 @@ function GameObjectHandler()
                 object[key]();
 
                 // Refreshes the object's cell place after it has been moved 
-                if(object.body.moves)
+                if(object.bodyConf.moves)
                 {
                     cameraGrid.removeReference(object);
                     cameraGrid.addReference(object);
@@ -114,7 +119,7 @@ function GameObjectHandler()
                 callback(object, gameObjects.references[i], used[i][j]);
 
                 // Refreshes the object's cell place after it has been moved 
-                if(object.body.moves)
+                if(object.bodyConf.moves)
                 {
                     cameraGrid.removeReference(object);
                     cameraGrid.addReference(object);

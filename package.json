@@ -1,6 +1,6 @@
 {
   "name": "cartesiansystem",
-  "version": "0.7.2",
+  "version": "0.8.4",
   "description": "A spatial partitioning system",
   "main": "./src/index.js",
   "scripts": {

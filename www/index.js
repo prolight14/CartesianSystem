@@ -27,7 +27,7 @@ var Rect = function(x, y, width, height)
 
     var _this = this;
 
-    this.body = {
+    this.bodyConf = {
         moves: false,
         boundingBox: {
             minX: x,
@@ -50,7 +50,7 @@ var Block = function(x, y, width, height, color)
 {
     Rect.call(this, x, y, width, height);
 
-    this.body.moves = true;
+    this.bodyConf.moves = true;
 
     var lastMoveTime = Date.now() + 5000 * Math.random();
 
@@ -73,7 +73,7 @@ var Block = function(x, y, width, height, color)
         this.x += this.vel.x;
         this.y += this.vel.y;
 
-        this.body.updateBoundingBox();
+        this.bodyConf.updateBoundingBox();
     };
 
     this.draw = function()
@@ -124,7 +124,7 @@ var Player = function(x, y, width, height)
 
     this.color = "red";
 
-    this.body.moves = true;
+    this.bodyConf.moves = true;
 
     this.update = function()
     {
@@ -145,7 +145,7 @@ var Player = function(x, y, width, height)
             this.y += 5;
         }
 
-        this.body.updateBoundingBox();
+        this.bodyConf.updateBoundingBox();
     };
 
     this.draw = function()
@@ -179,11 +179,7 @@ window.setInterval(() =>
 
         world.update(player1.x + player1.width / 2, player1.y + player1.height / 2, "update", "draw");
 
-        world.grid.loopThroughVisibleCells(
-            world.minCamPos.col, 
-            world.minCamPos.row, 
-            world.maxCamPos.col, 
-            world.maxCamPos.row, 
+        world.loopThroughVisibleCells(
             function(cell, col, row)
             {
                 if(mouse.isDown)
@@ -197,8 +193,8 @@ window.setInterval(() =>
                         tx = world.camera.scrollX - world.camera.halfWidth - world.camera.x + mouse.x;
                         ty = world.camera.scrollY - world.camera.halfHeight - world.camera.y + mouse.y;
 
-                        if(tx > object.body.boundingBox.minX && ty > object.body.boundingBox.minY && 
-                        tx < object.body.boundingBox.maxX && ty < object.body.boundingBox.maxY)
+                        if(tx > object.bodyConf.boundingBox.minX && ty > object.bodyConf.boundingBox.minY && 
+                        tx < object.bodyConf.boundingBox.maxX && ty < object.bodyConf.boundingBox.maxY)
                         {
                             world.remove.gameObject(object._arrayName, object._id);
                         }

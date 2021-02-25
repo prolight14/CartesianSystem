@@ -13,7 +13,7 @@ var CartesianSystem = {
             config.window.height
         );
 
-        this.grid = new CameraGrid(
+        this.cameraGrid = new CameraGrid(
             config.grid.cols, 
             config.grid.rows, 
             config.grid.cellWidth,
@@ -24,7 +24,7 @@ var CartesianSystem = {
 
         this.init = function()
         {
-            this.grid.reset();
+            this.cameraGrid.reset();
 
             return this;
         };
@@ -49,7 +49,7 @@ var CartesianSystem = {
                 value: function()
                 {
                     var gameObject = lastAdd.apply(this, arguments);
-                    _this.grid.addReference(gameObject);
+                    _this.cameraGrid.addReference(gameObject);
                     return gameObject;
                 }
             });
@@ -67,7 +67,7 @@ var CartesianSystem = {
                         return;
                     }
 
-                    _this.grid.addReference(gameObject);
+                    _this.cameraGrid.addReference(gameObject);
                     return gameObject;
                 }
             });
@@ -80,7 +80,7 @@ var CartesianSystem = {
                 configurable: true,
                 value: function(id)
                 {
-                    _this.grid.removeReference(this[id]);
+                    _this.cameraGrid.removeReference(this[id]);
                     return lastRemove.apply(this, arguments);
                 }
             });
@@ -92,7 +92,7 @@ var CartesianSystem = {
                 configurable: true,
                 value: function(name)
                 {
-                    _this.grid.removeReference(this[this.references[name]]);
+                    _this.cameraGrid.removeReference(this[this.references[name]]);
                     return lastRemoveObject.apply(this, arguments);
                 }
             });
@@ -103,7 +103,7 @@ var CartesianSystem = {
         {
             var gameObjectArray = _this.gameObjectHandler.getArray(arrayName);
             var gameObject = gameObjectArray.add.apply(gameObjectArray, Array.prototype.slice.call(arguments, 1));
-            _this.grid.addReference(gameObject);
+            _this.cameraGrid.addReference(gameObject);
             return gameObject;
         };
 
@@ -120,14 +120,14 @@ var CartesianSystem = {
         this.remove = {};
         this.remove.gameObjectArray = function(arrayName)
         {
-            _this.grid.removeAll(arrayName);
+            _this.cameraGrid.removeAll(arrayName);
             gameObjectHandler.removeArray(arrayName);
             return this;
         };
         this.remove.gameObject = function(arrayName, id)
         {
             var gameObjectArray = _this.gameObjectHandler.getArray(arrayName);
-            _this.grid.removeReference(gameObjectArray[id]);
+            _this.cameraGrid.removeReference(gameObjectArray[id]);
             gameObjectArray.remove(id);
             return this;
         };
@@ -136,16 +136,54 @@ var CartesianSystem = {
         this.bounds = {
             minX: 0,
             minY: 0,
-            maxX: 0 + this.grid.cols * this.grid.cellWidth,
-            maxY: 0 + this.grid.rows * this.grid.cellHeight
+            maxX: 0 + this.cameraGrid.cols * this.cameraGrid.cellWidth,
+            maxY: 0 + this.cameraGrid.rows * this.cameraGrid.cellHeight
+        };
+
+        this.loopThroughVisibleCells = function(callback)
+        {
+            var minPos = this.minCamPos = this.cameraGrid.getCoordinates(this.camera.boundingBox.minX, this.camera.boundingBox.minY);
+            var maxPos = this.maxCamPos = this.cameraGrid.getCoordinates(this.camera.boundingBox.maxX, this.camera.boundingBox.maxY);
+
+            this.cameraGrid.loopThroughCells( 
+                minPos.col,
+                minPos.row,
+                maxPos.col,
+                maxPos.row, 
+                callback
+            );
+        };
+
+        this.updateProcessList = function()
+        {
+            var minPos = this.minCamPos = this.cameraGrid.getCoordinates(this.camera.boundingBox.minX, this.camera.boundingBox.minY);
+            var maxPos = this.maxCamPos = this.cameraGrid.getCoordinates(this.camera.boundingBox.maxX, this.camera.boundingBox.maxY);
+
+            this.gameObjectHandler.addToProcessList(
+                this.cameraGrid,
+                minPos.col,
+                minPos.row,
+                maxPos.col,
+                maxPos.row
+            );
+        };
+
+        this.loopProcessList = function(callback)
+        {
+            this.gameObjectHandler.loopProcessList(this.cameraGrid, callback);
+        };
+
+        this.resetProcessList = function()
+        {
+            this.gameObjectHandler.resetProcessList();
         };
 
         this.update = function(x, y)
         {
             this.camera.updateScroll(x, y, this.bounds);
 
-            var minPos = this.minCamPos = this.grid.getCoordinates(this.camera.boundingBox.minX, this.camera.boundingBox.minY);
-            var maxPos = this.maxCamPos = this.grid.getCoordinates(this.camera.boundingBox.maxX, this.camera.boundingBox.maxY);
+            var minPos = this.minCamPos = this.cameraGrid.getCoordinates(this.camera.boundingBox.minX, this.camera.boundingBox.minY);
+            var maxPos = this.maxCamPos = this.cameraGrid.getCoordinates(this.camera.boundingBox.maxX, this.camera.boundingBox.maxY);
 
             // Bail if we don't have enough arguments to suffice `GameObjecthandler#act`
             if(arguments.length <= 2)
@@ -154,7 +192,7 @@ var CartesianSystem = {
             }
 
             this.gameObjectHandler.addToProcessList(
-                this.grid,
+                this.cameraGrid,
                 minPos.col,
                 minPos.row,
                 maxPos.col,
@@ -165,7 +203,7 @@ var CartesianSystem = {
 
             for(var i = 0; i < inputArgs.length; i++)
             {
-                this.gameObjectHandler.act.apply(this.gameObjectHandler, [this.grid].concat(inputArgs[i]));
+                this.gameObjectHandler.act.apply(this.gameObjectHandler, [this.cameraGrid].concat(inputArgs[i]));
             }
 
             this.gameObjectHandler.resetProcessList();
